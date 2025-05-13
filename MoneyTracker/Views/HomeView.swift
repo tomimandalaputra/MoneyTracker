@@ -1,0 +1,158 @@
+//
+//  HomeView.swift
+//  IncomeTracker
+//
+//  Created by Tomi Mandala Putra on 12/05/2025.
+//
+
+import SwiftUI
+
+struct HomeView: View {
+    @State private var transactions: [Transaction] = []
+
+    @State private var transactionEdit: Transaction?
+
+    private var expenses: String {
+        let sumExpenses = transactions.filter { $0.type == .expense }.reduce(0) { $0 + $1.amount }
+        let numberFormatter = NumberFormatter()
+        numberFormatter.numberStyle = .currency
+        numberFormatter.currencyCode = "USD"
+        numberFormatter.currencySymbol = "$"
+        numberFormatter.maximumFractionDigits = 2
+        return numberFormatter.string(from: sumExpenses as NSNumber) ?? "$0.00"
+    }
+
+    private var income: String {
+        let sumIncome = transactions.filter { $0.type == .income }.reduce(0) { $0 + $1.amount }
+        let numberFormatter = NumberFormatter()
+        numberFormatter.numberStyle = .currency
+        numberFormatter.currencyCode = "USD"
+        numberFormatter.currencySymbol = "$"
+        numberFormatter.maximumFractionDigits = 2
+        return numberFormatter.string(from: sumIncome as NSNumber) ?? "$0.00"
+    }
+
+    private var balance: String {
+        let sumIncome = transactions.filter { $0.type == .income }.reduce(0) { $0 + $1.amount }
+        let sumExpenses = transactions.filter { $0.type == .expense }.reduce(0) { $0 + $1.amount }
+        let total = sumIncome - sumExpenses
+
+        let numberFormatter = NumberFormatter()
+        numberFormatter.numberStyle = .currency
+        numberFormatter.currencyCode = "USD"
+        numberFormatter.currencySymbol = "$"
+        numberFormatter.maximumFractionDigits = 2
+        return numberFormatter.string(from: total as NSNumber) ?? "$0.00"
+    }
+
+    fileprivate func FlotingButton() -> some View {
+        VStack {
+            Spacer()
+            NavigationLink {
+                AddTransactionView(transactions: $transactions)
+            } label: {
+                Text("+")
+                    .font(.largeTitle)
+                    .foregroundStyle(.white)
+                    .frame(width: 70, height: 70)
+            }
+            .background(.primaryLightGreen)
+            .clipShape(Circle())
+        }
+    }
+
+    fileprivate func BalanceView() -> some View {
+        ZStack {
+            RoundedRectangle(cornerRadius: 8)
+                .fill(.primaryLightGreen)
+
+            VStack(alignment: .leading, spacing: 5) {
+                HStack {
+                    VStack(alignment: .leading) {
+                        Text("BALANCE")
+                            .font(.caption)
+                            .foregroundStyle(.white)
+
+                        Text(balance)
+                            .font(.system(size: 42, weight: .light))
+                            .foregroundStyle(.white)
+                    }
+                    Spacer()
+                }
+
+                HStack(spacing: 24) {
+                    VStack(alignment: .leading) {
+                        Text("Expense")
+                            .font(.system(size: 15, weight: .semibold))
+                            .foregroundStyle(.white)
+                        Text(expenses)
+                            .font(.system(size: 15, weight: .regular))
+                            .foregroundStyle(.white)
+                    }
+
+                    VStack(alignment: .leading) {
+                        Text("Income")
+                            .font(.system(size: 15, weight: .semibold))
+                            .foregroundStyle(.white)
+                        Text(income)
+                            .font(.system(size: 15, weight: .regular))
+                            .foregroundStyle(.white)
+                    }
+                }
+
+                Spacer()
+            }
+            .padding([.top, .horizontal])
+        }
+        .shadow(color: .black.opacity(0.5), radius: 10, x: 0, y: 5)
+        .frame(height: 150)
+        .padding(.horizontal)
+    }
+
+    var body: some View {
+        NavigationStack {
+            ZStack {
+                VStack {
+                    BalanceView()
+
+                    List {
+                        ForEach(transactions) { transaction in
+                            Button(action: {
+                                transactionEdit = transaction
+                            }, label: {
+                                TransactionView(transaction: transaction)
+                                    .foregroundStyle(.black)
+                            })
+                        }
+
+                        .onDelete { index in
+                            transactions.remove(atOffsets: index)
+                        }
+                    }
+                    .scrollContentBackground(.hidden)
+                }
+                FlotingButton()
+            }
+            .navigationTitle("Money Tracker")
+            .navigationDestination(item: $transactionEdit, destination: { transactionEdit in
+                EditTransactionView(
+                    transactions: $transactions,
+                    transactionEdit: transactionEdit
+                )
+
+            })
+            .toolbar {
+                ToolbarItem(placement: .primaryAction) {
+                    Button(action: {}, label: {
+                        Image(systemName: "gearshape.fill")
+                            .foregroundStyle(.black)
+                    })
+                }
+            }
+        }
+    }
+}
+
+#Preview {
+    HomeView()
+}
