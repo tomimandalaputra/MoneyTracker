@@ -9,8 +9,16 @@ import SwiftUI
 
 struct HomeView: View {
     @State private var transactions: [Transaction] = []
-
     @State private var transactionEdit: Transaction?
+    @State private var showSettingsView: Bool = false
+
+    @AppStorage("orderDescending") private var orderDescending: Bool = false
+
+    private var displayTransactions: [Transaction] {
+        let sortedTransactions = orderDescending ? transactions.sorted(by: { $0.date < $1.date }) : transactions.sorted(by: { $0.date > $1.date })
+
+        return sortedTransactions
+    }
 
     private var expenses: String {
         let sumExpenses = transactions.filter { $0.type == .expense }.reduce(0) { $0 + $1.amount }
@@ -116,7 +124,7 @@ struct HomeView: View {
                     BalanceView()
 
                     List {
-                        ForEach(transactions) { transaction in
+                        ForEach(displayTransactions) { transaction in
                             Button(action: {
                                 transactionEdit = transaction
                             }, label: {
@@ -141,9 +149,15 @@ struct HomeView: View {
                 )
 
             })
+            .sheet(isPresented: $showSettingsView, content: {
+                SettingsView()
+                    .presentationDetents([.height(300), .medium])
+            })
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
-                    Button(action: {}, label: {
+                    Button(action: {
+                        showSettingsView = true
+                    }, label: {
                         Image(systemName: "gearshape.fill")
                             .foregroundStyle(.black)
                     })
