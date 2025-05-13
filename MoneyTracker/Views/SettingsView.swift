@@ -10,7 +10,7 @@ import SwiftUI
 struct SettingsView: View {
     @AppStorage("orderDescending") var orderDescending: Bool = false
     @AppStorage("currency") var currency: Currency = .usd
-    @State private var filterMinimum: Double = 0.0
+    @AppStorage("filterMinimum") var filterMinimum: Double = 0.0
 
     private var toggleLable: String {
         orderDescending ? "Earliest" : "Latest"

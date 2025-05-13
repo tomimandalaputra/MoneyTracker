@@ -14,11 +14,14 @@ struct HomeView: View {
 
     @AppStorage("orderDescending") private var orderDescending: Bool = false
     @AppStorage("currency") var currency: Currency = .usd
+    @AppStorage("filterMinimum") var filterMinimum: Double = 0.0
 
     private var displayTransactions: [Transaction] {
         let sortedTransactions = orderDescending ? transactions.sorted(by: { $0.date < $1.date }) : transactions.sorted(by: { $0.date > $1.date })
 
-        return sortedTransactions
+        let filteredTransactions = sortedTransactions.filter { $0.amount > filterMinimum }
+
+        return filteredTransactions
     }
 
     private var expenses: String {
