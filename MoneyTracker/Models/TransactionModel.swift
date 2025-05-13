@@ -9,7 +9,6 @@ import Foundation
 
 protocol TransactionProtocol {
     var displayDate: String { get }
-    var displayAmount: String { get }
 }
 
 struct Transaction: TransactionProtocol, Identifiable, Hashable {
@@ -29,14 +28,13 @@ extension Transaction {
         return dateFormatter.string(from: date)
     }
 
-    // MARK: - Computed formatter Currency
+    // MARK: - func formatter Currency
 
-    var displayAmount: String {
+    func displayCurrency(currency: Currency) -> String {
         let numberFormatter = NumberFormatter()
         numberFormatter.numberStyle = .currency
-        numberFormatter.currencyCode = "USD"
-        numberFormatter.currencySymbol = "$"
+        numberFormatter.locale = currency.locale
         numberFormatter.maximumFractionDigits = 2
-        return numberFormatter.string(from: amount as NSNumber) ?? "$0.00"
+        return numberFormatter.string(from: NSNumber(value: amount)) ?? ""
     }
 }

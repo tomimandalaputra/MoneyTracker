@@ -15,11 +15,12 @@ struct AddTransactionView: View {
     @State private var selectedTransactionType: TransactionType = .expense
     @State private var transactionTitle: String = ""
 
+    @AppStorage("currency") var currency: Currency = .usd
+
     var numberFormatter: NumberFormatter {
         let formatter = NumberFormatter()
         formatter.numberStyle = .currency
-        formatter.currencyCode = "USD"
-        formatter.currencySymbol = "$"
+        formatter.locale = currency.locale
         formatter.maximumFractionDigits = 2
         return formatter
     }

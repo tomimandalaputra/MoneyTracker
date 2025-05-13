@@ -8,8 +8,8 @@
 import SwiftUI
 
 struct SettingsView: View {
-    @AppStorage("orderDescending") private var orderDescending: Bool = false
-    @State private var currency: Currency = .usd
+    @AppStorage("orderDescending") var orderDescending: Bool = false
+    @AppStorage("currency") var currency: Currency = .usd
     @State private var filterMinimum: Double = 0.0
 
     private var toggleLable: String {
@@ -19,8 +19,7 @@ struct SettingsView: View {
     var numberFormatter: NumberFormatter {
         let formatter = NumberFormatter()
         formatter.numberStyle = .currency
-        formatter.currencyCode = "USD"
-        formatter.currencySymbol = "$"
+        formatter.locale = currency.locale
         formatter.maximumFractionDigits = 2
         return formatter
     }

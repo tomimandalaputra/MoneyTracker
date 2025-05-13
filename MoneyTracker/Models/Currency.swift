@@ -12,8 +12,15 @@ enum Currency: String, CaseIterable {
 
     var title: String {
         switch self {
-            case .usd: return "USD"
-            case .idr: return "IDR"
+        case .usd: return "USD"
+        case .idr: return "IDR"
+        }
+    }
+
+    var locale: Locale {
+        switch self {
+        case .usd: return Locale(identifier: "en_US")
+        case .idr: return Locale(identifier: "id_ID")
         }
     }
 }

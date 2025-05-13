@@ -13,6 +13,7 @@ struct HomeView: View {
     @State private var showSettingsView: Bool = false
 
     @AppStorage("orderDescending") private var orderDescending: Bool = false
+    @AppStorage("currency") var currency: Currency = .usd
 
     private var displayTransactions: [Transaction] {
         let sortedTransactions = orderDescending ? transactions.sorted(by: { $0.date < $1.date }) : transactions.sorted(by: { $0.date > $1.date })
@@ -24,8 +25,7 @@ struct HomeView: View {
         let sumExpenses = transactions.filter { $0.type == .expense }.reduce(0) { $0 + $1.amount }
         let numberFormatter = NumberFormatter()
         numberFormatter.numberStyle = .currency
-        numberFormatter.currencyCode = "USD"
-        numberFormatter.currencySymbol = "$"
+        numberFormatter.locale = currency.locale
         numberFormatter.maximumFractionDigits = 2
         return numberFormatter.string(from: sumExpenses as NSNumber) ?? "$0.00"
     }
@@ -34,8 +34,7 @@ struct HomeView: View {
         let sumIncome = transactions.filter { $0.type == .income }.reduce(0) { $0 + $1.amount }
         let numberFormatter = NumberFormatter()
         numberFormatter.numberStyle = .currency
-        numberFormatter.currencyCode = "USD"
-        numberFormatter.currencySymbol = "$"
+        numberFormatter.locale = currency.locale
         numberFormatter.maximumFractionDigits = 2
         return numberFormatter.string(from: sumIncome as NSNumber) ?? "$0.00"
     }
@@ -47,8 +46,7 @@ struct HomeView: View {
 
         let numberFormatter = NumberFormatter()
         numberFormatter.numberStyle = .currency
-        numberFormatter.currencyCode = "USD"
-        numberFormatter.currencySymbol = "$"
+        numberFormatter.locale = currency.locale
         numberFormatter.maximumFractionDigits = 2
         return numberFormatter.string(from: total as NSNumber) ?? "$0.00"
     }
