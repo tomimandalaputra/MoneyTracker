@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct SettingsView: View {
-    @State private var orderDescending: Bool = false
+    @AppStorage("orderDescending") private var orderDescending: Bool = false
     @State private var currency: Currency = .usd
     @State private var filterMinimum: Double = 0.0
 
@@ -26,26 +26,29 @@ struct SettingsView: View {
     }
 
     var body: some View {
-        List {
-            HStack {
-                Toggle(isOn: $orderDescending, label: {
-                    Text("Order (\(toggleLable))")
-                })
-            }
+        NavigationStack {
+            List {
+                HStack {
+                    Toggle(isOn: $orderDescending, label: {
+                        Text("Order (\(toggleLable))")
+                    })
+                }
 
-            HStack {
-                Picker("Currency", selection: $currency) {
-                    ForEach(Currency.allCases, id: \.self) { currency in
-                        Text(currency.title).tag(currency)
+                HStack {
+                    Picker("Currency", selection: $currency) {
+                        ForEach(Currency.allCases, id: \.self) { currency in
+                            Text(currency.title).tag(currency)
+                        }
                     }
                 }
-            }
 
-            HStack {
-                Text("Filter Minimum")
-                TextField("0.0", value: $filterMinimum, formatter: numberFormatter)
-                    .multilineTextAlignment(.trailing)
+                HStack {
+                    Text("Filter Minimum")
+                    TextField("0.0", value: $filterMinimum, formatter: numberFormatter)
+                        .multilineTextAlignment(.trailing)
+                }
             }
+            .navigationTitle("Settings")
         }
     }
 }
