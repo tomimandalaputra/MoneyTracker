@@ -9,11 +9,15 @@ import SwiftUI
 
 struct AddTransactionView: View {
     @Binding var transactions: [Transaction]
-    @Environment(\.dismiss) var dismiss
+    @Environment(\.dismiss) private var dismiss
+    @Environment(\.managedObjectContext) private var viewContext
 
     @State private var amount: Double = 0.0
     @State private var selectedTransactionType: TransactionType = .expense
     @State private var transactionTitle: String = ""
+    @State private var alertTitle: String = ""
+    @State private var alertMessage: String = ""
+    @State private var showAlert: Bool = false
 
     @AppStorage("currency") var currency: Currency = .usd
 
@@ -89,12 +93,34 @@ struct AddTransactionView: View {
             }
         }
         .navigationBarBackButtonHidden(true)
+        .alert(alertTitle, isPresented: $showAlert) {
+            Button(action: {}, label: {
+                Text("OK")
+            })
+        } message: {
+            Text(alertMessage)
+        }
     }
 
     private func createTransaction() {
-        let newTransaction = Transaction(title: transactionTitle, type: selectedTransactionType, amount: amount, date: Date())
+//        let newTransaction = Transaction(title: transactionTitle, type: selectedTransactionType, amount: amount, date: Date())
+//        transactions.append(newTransaction)
 
-        transactions.append(newTransaction)
+        let transaction = TransactionItem(context: viewContext)
+        transaction.id = UUID()
+        transaction.title = transactionTitle
+        transaction.type = Int16(selectedTransactionType.rawValue)
+        transaction.amount = amount
+        transaction.date = Date()
+
+        do {
+            try viewContext.save()
+        } catch {
+            alertTitle = "Something went wrong"
+            alertMessage = "Unable to create a transaction"
+            showAlert = true
+            return
+        }
 
         dismiss()
     }
