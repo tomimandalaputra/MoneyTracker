@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct TransactionView: View {
-    let transaction: Transaction
+    let transaction: TransactionItem
 
     @AppStorage("currency") var currency: Currency = .usd
 
@@ -25,10 +25,10 @@ struct TransactionView: View {
             .clipShape(RoundedRectangle(cornerRadius: 8))
 
             HStack {
-                IconTypeView(type: transaction.type)
+                IconTypeView(type: transaction.wrappedType)
                 VStack(alignment: .leading, spacing: 4) {
                     HStack {
-                        Text(transaction.title)
+                        Text(transaction.wrappedTitle)
                             .font(.system(size: 15, weight: .bold))
                         Spacer()
                         Text(String(transaction.displayCurrency(currency: currency)))
@@ -44,6 +44,6 @@ struct TransactionView: View {
     }
 }
 
-#Preview {
-    TransactionView(transaction: Transaction(title: "Apple", type: .expense, amount: 5.00, date: Date()))
-}
+// #Preview {
+//    TransactionView(transaction: Transaction(title: "Apple", type: .expense, amount: 5.00, date: Date()))
+// }

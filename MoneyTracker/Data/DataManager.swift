@@ -13,12 +13,10 @@ class DataManager {
     static let shared = DataManager()
 
     private init() {
-        container.loadPersistentStores { storedDescription, error in
-            if let error = error as NSError? {
+        container.loadPersistentStores { _, error in
+            if let error = error {
                 print(error.localizedDescription)
             }
-
-            print(storedDescription)
         }
     }
 }

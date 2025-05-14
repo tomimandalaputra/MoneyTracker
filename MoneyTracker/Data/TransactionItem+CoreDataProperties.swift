@@ -43,4 +43,18 @@ extension TransactionItem {
     var wrappedAmount: Double {
         return amount
     }
+
+    var displayDate: String {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateStyle = .medium
+        return dateFormatter.string(from: wrappedDate)
+    }
+
+    func displayCurrency(currency: Currency) -> String {
+        let numberFormatter = NumberFormatter()
+        numberFormatter.numberStyle = .currency
+        numberFormatter.locale = currency.locale
+        numberFormatter.maximumFractionDigits = 2
+        return numberFormatter.string(from: NSNumber(value: amount)) ?? ""
+    }
 }

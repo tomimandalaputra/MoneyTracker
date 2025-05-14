@@ -5,19 +5,22 @@
 //  Created by Tomi Mandala Putra on 12/05/2025.
 //
 
+import CoreData
 import SwiftUI
 
 struct HomeView: View {
-    @State private var transactions: [Transaction] = []
-    @State private var transactionEdit: Transaction?
+    @State private var transactionEdit: TransactionItem?
     @State private var showSettingsView: Bool = false
+
+    @FetchRequest(sortDescriptors: []) var transactions: FetchedResults<TransactionItem>
+    @Environment(\.managedObjectContext) private var viewContext
 
     @AppStorage("orderDescending") private var orderDescending: Bool = false
     @AppStorage("currency") var currency: Currency = .usd
     @AppStorage("filterMinimum") var filterMinimum: Double = 0.0
 
-    private var displayTransactions: [Transaction] {
-        let sortedTransactions = orderDescending ? transactions.sorted(by: { $0.date < $1.date }) : transactions.sorted(by: { $0.date > $1.date })
+    private var displayTransactions: [TransactionItem] {
+        let sortedTransactions = orderDescending ? transactions.sorted(by: { $0.wrappedDate < $1.wrappedDate }) : transactions.sorted(by: { $0.wrappedDate > $1.wrappedDate })
 
         let filteredTransactions = sortedTransactions.filter { $0.amount > filterMinimum }
 
@@ -25,40 +28,40 @@ struct HomeView: View {
     }
 
     private var expenses: String {
-        let sumExpenses = transactions.filter { $0.type == .expense }.reduce(0) { $0 + $1.amount }
+        let sumExpenses = transactions.filter { $0.wrappedType == .expense }.reduce(0) { $0 + $1.amount }
         let numberFormatter = NumberFormatter()
         numberFormatter.numberStyle = .currency
         numberFormatter.locale = currency.locale
         numberFormatter.maximumFractionDigits = 2
-        return numberFormatter.string(from: sumExpenses as NSNumber) ?? "$0.00"
+        return numberFormatter.string(from: sumExpenses as NSNumber) ?? "0.00"
     }
 
     private var income: String {
-        let sumIncome = transactions.filter { $0.type == .income }.reduce(0) { $0 + $1.amount }
+        let sumIncome = transactions.filter { $0.wrappedType == .income }.reduce(0) { $0 + $1.amount }
         let numberFormatter = NumberFormatter()
         numberFormatter.numberStyle = .currency
         numberFormatter.locale = currency.locale
         numberFormatter.maximumFractionDigits = 2
-        return numberFormatter.string(from: sumIncome as NSNumber) ?? "$0.00"
+        return numberFormatter.string(from: sumIncome as NSNumber) ?? "0.00"
     }
 
     private var balance: String {
-        let sumIncome = transactions.filter { $0.type == .income }.reduce(0) { $0 + $1.amount }
-        let sumExpenses = transactions.filter { $0.type == .expense }.reduce(0) { $0 + $1.amount }
+        let sumIncome = transactions.filter { $0.wrappedType == .income }.reduce(0) { $0 + $1.amount }
+        let sumExpenses = transactions.filter { $0.wrappedType == .expense }.reduce(0) { $0 + $1.amount }
         let total = sumIncome - sumExpenses
 
         let numberFormatter = NumberFormatter()
         numberFormatter.numberStyle = .currency
         numberFormatter.locale = currency.locale
         numberFormatter.maximumFractionDigits = 2
-        return numberFormatter.string(from: total as NSNumber) ?? "$0.00"
+        return numberFormatter.string(from: total as NSNumber) ?? "0.00"
     }
 
     fileprivate func FlotingButton() -> some View {
         VStack {
             Spacer()
             NavigationLink {
-                AddTransactionView(transactions: $transactions)
+                AddTransactionView()
             } label: {
                 Text("+")
                     .font(.largeTitle)
@@ -133,10 +136,7 @@ struct HomeView: View {
                                     .foregroundStyle(.black)
                             })
                         }
-
-                        .onDelete { index in
-                            transactions.remove(atOffsets: index)
-                        }
+                        .onDelete(perform: deleteData)
                     }
                     .scrollContentBackground(.hidden)
                 }
@@ -145,7 +145,6 @@ struct HomeView: View {
             .navigationTitle("Money Tracker")
             .navigationDestination(item: $transactionEdit, destination: { transactionEdit in
                 EditTransactionView(
-                    transactions: $transactions,
                     transactionEdit: transactionEdit
                 )
 
@@ -164,6 +163,13 @@ struct HomeView: View {
                     })
                 }
             }
+        }
+    }
+
+    private func deleteData(at offsets: IndexSet) {
+        for index in offsets {
+            let transactionToDelete = displayTransactions[index]
+            viewContext.delete(transactionToDelete)
         }
     }
 }
