@@ -5,10 +5,12 @@
 //  Created by Tomi Mandala Putra on 12/05/2025.
 //
 
+import RealmSwift
 import SwiftUI
 
 struct AddTransactionView: View {
-    @Binding var transactions: [Transaction]
+    @ObservedResults(TransactionModel.self) private var transactions
+
     @Environment(\.dismiss) var dismiss
 
     @State private var amount: Double = 0.0
@@ -92,14 +94,12 @@ struct AddTransactionView: View {
     }
 
     private func createTransaction() {
-        let newTransaction = Transaction(title: transactionTitle, type: selectedTransactionType, amount: amount, date: Date())
-
-        transactions.append(newTransaction)
-
+        let transaction = TransactionModel(_id: ObjectId(), title: transactionTitle, type: selectedTransactionType, amount: amount, date: Date())
+        $transactions.append(transaction)
         dismiss()
     }
 }
 
-#Preview {
-    AddTransactionView(transactions: .constant([]))
-}
+// #Preview {
+//    AddTransactionView(transactions: .constant([]))
+// }

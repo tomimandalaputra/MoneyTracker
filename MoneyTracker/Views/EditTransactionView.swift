@@ -5,18 +5,22 @@
 //  Created by Tomi Mandala Putra on 12/05/2025.
 //
 
+import RealmSwift
 import SwiftUI
 
 struct EditTransactionView: View {
     @Environment(\.dismiss) var dismiss
-    @Binding var transactions: [Transaction]
-    var transactionEdit: Transaction?
 
     @State private var amount: Double = 0.0
     @State private var selectedTransactionType: TransactionType = .expense
     @State private var transactionTitle: String = ""
+    @State private var alertTitle: String = ""
+    @State private var alertMessage: String = ""
+    @State private var showAlert: Bool = false
 
     @AppStorage("currency") var currency: Currency = .usd
+
+    @ObservedRealmObject var transactionEdit: TransactionModel
 
     var numberFormatter: NumberFormatter {
         let formatter = NumberFormatter()
@@ -91,27 +95,38 @@ struct EditTransactionView: View {
         }
         .navigationBarBackButtonHidden(true)
         .onAppear {
-            if let transactionEdit = transactionEdit {
-                amount = transactionEdit.amount
-                selectedTransactionType = transactionEdit.type
-                transactionTitle = transactionEdit.title
-            }
+            amount = transactionEdit.amount
+            transactionTitle = transactionEdit.title
+            selectedTransactionType = transactionEdit.type
+        }
+        .alert(alertTitle, isPresented: $showAlert) {
+            Button(action: {}, label: {
+                Text("OK")
+            })
+        } message: {
+            Text(alertMessage)
         }
     }
 
     private func updateTransaction() {
-        guard let indexOfTransaction = transactions.firstIndex(of: transactionEdit!) else {
+        guard let realm = transactionEdit.realm?.thaw() else {
+            alertTitle = "Oooopsss"
+            alertMessage = "Transaction could not be edited rigth now"
+            showAlert = true
             return
         }
 
-        let transaction = Transaction(title: transactionTitle, type: selectedTransactionType, amount: amount, date: Date())
-
-        transactions[indexOfTransaction] = transaction
-
+        do {
+            try realm.write {
+                transactionEdit.thaw()?.title = transactionTitle
+                transactionEdit.thaw()?.type = selectedTransactionType
+                transactionEdit.thaw()?.amount = amount
+            }
+        } catch {}
         dismiss()
     }
 }
 
-#Preview {
-    EditTransactionView(transactions: .constant([]))
-}
+// #Preview {
+//    EditTransactionView(transactions: .constant([]))
+// }

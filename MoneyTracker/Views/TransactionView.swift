@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct TransactionView: View {
-    let transaction: Transaction
+    let transaction: TransactionModel
 
     @AppStorage("currency") var currency: Currency = .usd
 
@@ -44,6 +44,6 @@ struct TransactionView: View {
     }
 }
 
-#Preview {
-    TransactionView(transaction: Transaction(title: "Apple", type: .expense, amount: 5.00, date: Date()))
-}
+// #Preview {
+//    TransactionView(transaction: Transaction(title: "Apple", type: .expense, amount: 5.00, date: Date()))
+// }
