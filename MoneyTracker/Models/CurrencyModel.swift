@@ -1,5 +1,5 @@
 //
-//  Currency.swift
+//  CurrencyModel.swift
 //  MoneyTracker
 //
 //  Created by Tomi Mandala Putra on 13/05/2025.
