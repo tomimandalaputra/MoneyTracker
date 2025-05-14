@@ -5,11 +5,12 @@
 //  Created by Tomi Mandala Putra on 12/05/2025.
 //
 
+import SwiftData
 import SwiftUI
 
 struct AddTransactionView: View {
-    @Binding var transactions: [Transaction]
-    @Environment(\.dismiss) var dismiss
+    @Environment(\.dismiss) private var dismiss
+    @Environment(\.modelContext) private var modelContext
 
     @State private var amount: Double = 0.0
     @State private var selectedTransactionType: TransactionType = .expense
@@ -92,14 +93,14 @@ struct AddTransactionView: View {
     }
 
     private func createTransaction() {
-        let newTransaction = Transaction(title: transactionTitle, type: selectedTransactionType, amount: amount, date: Date())
+        let transaction = TransactionModel(id: UUID(), title: transactionTitle, type: selectedTransactionType, amount: amount, date: Date())
 
-        transactions.append(newTransaction)
+        modelContext.insert(transaction)
 
         dismiss()
     }
 }
 
-#Preview {
-    AddTransactionView(transactions: .constant([]))
-}
+// #Preview {
+//    AddTransactionView(transactions: .constant([]))
+// }

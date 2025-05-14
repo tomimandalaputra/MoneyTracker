@@ -5,12 +5,12 @@
 //  Created by Tomi Mandala Putra on 12/05/2025.
 //
 
+import SwiftData
 import SwiftUI
 
 struct EditTransactionView: View {
-    @Environment(\.dismiss) var dismiss
-    @Binding var transactions: [Transaction]
-    var transactionEdit: Transaction?
+    @Environment(\.dismiss) private var dismiss
+    var transactionEdit: TransactionModel?
 
     @State private var amount: Double = 0.0
     @State private var selectedTransactionType: TransactionType = .expense
@@ -100,18 +100,16 @@ struct EditTransactionView: View {
     }
 
     private func updateTransaction() {
-        guard let indexOfTransaction = transactions.firstIndex(of: transactionEdit!) else {
-            return
+        if let transactionEdit = transactionEdit {
+            transactionEdit.title = transactionTitle
+            transactionEdit.amount = amount
+            transactionEdit.type = selectedTransactionType
         }
-
-        let transaction = Transaction(title: transactionTitle, type: selectedTransactionType, amount: amount, date: Date())
-
-        transactions[indexOfTransaction] = transaction
 
         dismiss()
     }
 }
 
-#Preview {
-    EditTransactionView(transactions: .constant([]))
-}
+// #Preview {
+//    EditTransactionView(transactions: .constant([]))
+// }

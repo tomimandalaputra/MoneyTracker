@@ -5,18 +5,21 @@
 //  Created by Tomi Mandala Putra on 12/05/2025.
 //
 
+import SwiftData
 import SwiftUI
 
 struct HomeView: View {
-    @State private var transactions: [Transaction] = []
-    @State private var transactionEdit: Transaction?
+    @Query private var transactions: [TransactionModel]
+    @Environment(\.modelContext) private var modelContext
+
+    @State private var transactionEdit: TransactionModel?
     @State private var showSettingsView: Bool = false
 
     @AppStorage("orderDescending") private var orderDescending: Bool = false
     @AppStorage("currency") var currency: Currency = .usd
     @AppStorage("filterMinimum") var filterMinimum: Double = 0.0
 
-    private var displayTransactions: [Transaction] {
+    private var displayTransactions: [TransactionModel] {
         let sortedTransactions = orderDescending ? transactions.sorted(by: { $0.date < $1.date }) : transactions.sorted(by: { $0.date > $1.date })
 
         let filteredTransactions = sortedTransactions.filter { $0.amount > filterMinimum }
@@ -58,7 +61,7 @@ struct HomeView: View {
         VStack {
             Spacer()
             NavigationLink {
-                AddTransactionView(transactions: $transactions)
+                AddTransactionView()
             } label: {
                 Text("+")
                     .font(.largeTitle)
@@ -134,9 +137,7 @@ struct HomeView: View {
                             })
                         }
 
-                        .onDelete { index in
-                            transactions.remove(atOffsets: index)
-                        }
+                        .onDelete(perform: deleteData)
                     }
                     .scrollContentBackground(.hidden)
                 }
@@ -144,10 +145,7 @@ struct HomeView: View {
             }
             .navigationTitle("Money Tracker")
             .navigationDestination(item: $transactionEdit, destination: { transactionEdit in
-                EditTransactionView(
-                    transactions: $transactions,
-                    transactionEdit: transactionEdit
-                )
+                EditTransactionView(transactionEdit: transactionEdit)
 
             })
             .sheet(isPresented: $showSettingsView, content: {
@@ -166,8 +164,18 @@ struct HomeView: View {
             }
         }
     }
+
+    private func deleteData(at offsets: IndexSet) {
+        for index in offsets {
+            let transactionToDelete = transactions[index]
+            modelContext.delete(transactionToDelete)
+
+            try? modelContext.save()
+        }
+    }
 }
 
 #Preview {
-    HomeView()
+    let previewContainer = PreviewHelper.previewContainer
+    return HomeView().modelContainer(previewContainer)
 }
